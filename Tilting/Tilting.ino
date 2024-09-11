@@ -124,6 +124,24 @@ void loop() {
   // Convert the analog value to voltage (assuming a 5V reference)
   float voltage = analogValue * (5.0 / 1023.0);
 
+  if (movingToSetpoint) {
+    // Continuously check the limit switches during movement
+    if (digitalRead(LIMIT_SENSOR_MINUS_45) == LOW && myStepper.currentPosition() != -45 * steps_per_incline_degree + pos_45) {
+      // The -45° limit switch was triggered unexpectedly
+      handleLostSteps(-45);
+    } 
+    else if (digitalRead(LIMIT_SENSOR_PLUS_15) == LOW && myStepper.currentPosition() != 15 * steps_per_incline_degree + pos_45) {
+      // The +15° limit switch was triggered unexpectedly
+      handleLostSteps(15);
+    } 
+    else if (digitalRead(LIMIT_SENSOR_0) == LOW && myStepper.currentPosition() != 0 * steps_per_incline_degree + pos_45) {
+      // The vertical position (0°) sensor was triggered unexpectedly
+      handleLostSteps(0);
+    } else {
+      myStepper.run();  // Continue moving to the setpoint
+    }
+  }
+
   // Determine which button is pressed based on voltage range
   int buttonState = -1;  // Default to -1 for no button pressed
   if (voltage > 4.8 && voltage <= 5.0) {
@@ -234,23 +252,46 @@ void run_auto_calibration() {
 
   Serial.println("Starting auto calibration...");
 
+  // Reset the limit flags
+  limit_45 = false;
+  limit_15 = false;
+
+  long pos_45 = 0;   // Position at -45 degrees
+  long pos_15 = 0;   // Position at +15 degrees
+
   // Move the motor towards the -45 degrees limit switch
   myStepper.setSpeed(-500);  // Move in negative direction to find -45 degrees
+  Serial.println("Moving towards -45 degrees...");
+  
   while (!limit_45) {
     myStepper.runSpeed();  // Continuously move until limit is hit
   }
 
-  // Position is stored in the ISR for -45 degrees
+  if (limit_45) {
+    pos_45 = myStepper.currentPosition();  // Record position when -45 is hit
+    Serial.print("Position at -45 degrees: ");
+    Serial.println(pos_45);
+  } else {
+    Serial.println("Failed to detect -45 degrees limit switch.");
+  }
 
   delay(500);  // Short pause before moving to +15 degrees
 
   // Now move the motor in the positive direction to find +15 degrees limit switch
   myStepper.setSpeed(500);  // Move in positive direction
+  Serial.println("Moving towards +15 degrees...");
+  
   while (!limit_15) {
     myStepper.runSpeed();  // Continuously move until limit is hit
   }
 
-  // Position is stored in the ISR for +15 degrees
+  if (limit_15) {
+    pos_15 = myStepper.currentPosition();  // Record position when +15 is hit
+    Serial.print("Position at +15 degrees: ");
+    Serial.println(pos_15);
+  } else {
+    Serial.println("Failed to detect +15 degrees limit switch.");
+  }
 
   // Calculate the steps between -45 and +15 degrees
   long steps_between = pos_15 - pos_45;
@@ -258,8 +299,13 @@ void run_auto_calibration() {
   Serial.print("Steps between -45 and +15 degrees: ");
   Serial.println(steps_between);
 
-  // Calculate steps per degree
-  steps_per_incline_degree = (float)steps_between / 60.0;  // 60 degrees total
+  // Prevent division by zero
+  if (steps_between > 0) {
+    steps_per_incline_degree = (float)steps_between / 60.0;  // 60 degrees total
+  } else {
+    steps_per_incline_degree = 0;
+    Serial.println("Error: Invalid steps between positions. Check limit switches.");
+  }
 
   // Save the calculated value to EEPROM
   saveFloatToEEPROM(eepromAddress, steps_per_incline_degree);
@@ -273,6 +319,7 @@ void run_auto_calibration() {
   Serial.println(steps_per_incline_degree);
   Serial.println("Calibration complete.");
 }
+
 
 
 
@@ -365,6 +412,23 @@ void moveToSetpoint(int setpoint) {
 
   // Start the stepper movement
   movingToSetpoint = true;
+}
+
+void handleLostSteps(int unexpectedPosition) {
+  // Stop the motor immediately
+  myStepper.stop();
+  movingToSetpoint = false;
+
+  // Log the error and notify the user
+  Serial.print("Error: Limit switch triggered unexpectedly at position: ");
+  Serial.println(unexpectedPosition);
+
+  // Optional: Initiate recalibration or rehoming to a known position
+  Serial.println("Initiating recalibration...");
+  run_auto_calibration();  // Recalibrate to realign the motor
+
+  // Alternatively, you can move back to a known safe position
+  // moveToSetpoint(0);  // Rehome to the vertical upright position
 }
 
 
