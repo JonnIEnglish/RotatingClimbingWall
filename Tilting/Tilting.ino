@@ -12,13 +12,20 @@
 AccelStepper myStepper(AccelStepper::DRIVER, stepPin, dirPin);
 
 // Define maximum speed and acceleration
-#define ACCELERATION 10000  // Adjusted for practical acceleration
+#define ACCELERATION 1000  // Adjusted for practical acceleration
 #define MAX_SPEED 1000     // Adjusted for practical speed
 
 // Define digital pins for sensors
 #define LIMIT_SENSOR_MINUS_45 2    // Pin for sensor at -45 degrees (Digital pin 2 with interrupt)
 #define LIMIT_SENSOR_PLUS_15 3     // Pin for sensor at +15 degrees (Digital pin 3 with interrupt)
 #define LIMIT_SENSOR_0 4           // Pin for sensor at 0 degrees (Digital pin 4 polled)
+
+// Define states for calibration
+enum CalibrationState { IDLE, WAITING_CONFIRMATION, CALIBRATING };
+CalibrationState calibrationState = IDLE;
+
+unsigned long calibrationStartTime = 0;
+const unsigned long confirmationTimeout = 15000;  // 15 seconds timeout
 
 // Interrupt handler function declarations
 void sensorMinus45Triggered();
@@ -250,47 +257,92 @@ void run_auto_calibration() {
   // Set calibration flag
   calibrating = true;
 
+  // Ask for button confirmations before starting calibration
+  if (!confirmCalibration()) {
+    Serial.println("Calibration canceled.");
+    lcd.clear();
+    lcd.setCursor(0, 0);
+    lcd.print("Calibration Canceled");
+    delay(2000);  // Show canceled message briefly
+    lcd.clear();
+    calibrating = false;  // Exit calibration mode
+    return;  // Exit function
+  }
+
+  // Display calibration info on LCD
+  lcd.clear();
+  lcd.setCursor(0, 0);
+  lcd.print("Calibrating...");
+
   Serial.println("Starting auto calibration...");
 
   // Reset the limit flags
   limit_45 = false;
   limit_15 = false;
 
-  long pos_45 = 0;   // Position at -45 degrees
-  long pos_15 = 0;   // Position at +15 degrees
+  pos_45 = 0;   // Reset position at -45 degrees
+  pos_15 = 0;   // Reset position at +15 degrees
 
-  // Move the motor towards the -45 degrees limit switch
-  myStepper.setSpeed(-500);  // Move in negative direction to find -45 degrees
-  Serial.println("Moving towards -45 degrees...");
-  
+  // Move the motor towards -45 degrees while holding button 2
+  lcd.setCursor(0, 1);  // Update second row for calibration steps
+  lcd.print("Hold Btn 2: -45");
+
+  Serial.println("Waiting for button 2 to be held for -45 degrees...");
+
   while (!limit_45) {
-    myStepper.runSpeed();  // Continuously move until limit is hit
-  }
+    // Read the analog value for button presses
+    int analogValue = analogRead(A0);
+    float voltage = analogValue * (5.0 / 1023.0);
 
-  if (limit_45) {
-    pos_45 = myStepper.currentPosition();  // Record position when -45 is hit
-    Serial.print("Position at -45 degrees: ");
-    Serial.println(pos_45);
-  } else {
-    Serial.println("Failed to detect -45 degrees limit switch.");
+    // Check if Button 2 (voltage range for Button 2) is pressed to move to -45 degrees
+    if (voltage >= 0.6 && voltage <= 0.8) {
+      myStepper.setSpeed(-500);  // Move in the negative direction
+      myStepper.runSpeed();      // Continue moving as long as the button is pressed
+    } else {
+      myStepper.stop();  // Stop moving if the button is released
+    }
+
+    // Break the loop if the limit is reached
+    if (limit_45) {
+      pos_45 = myStepper.currentPosition();  // Record position when -45 is hit
+      Serial.print("Position at -45 degrees: ");
+      Serial.println(pos_45);
+      lcd.setCursor(0, 1);
+      lcd.print("Reached -45       ");
+      break;
+    }
   }
 
   delay(500);  // Short pause before moving to +15 degrees
 
-  // Now move the motor in the positive direction to find +15 degrees limit switch
-  myStepper.setSpeed(500);  // Move in positive direction
-  Serial.println("Moving towards +15 degrees...");
-  
-  while (!limit_15) {
-    myStepper.runSpeed();  // Continuously move until limit is hit
-  }
+  // Move the motor towards +15 degrees while holding button 3
+  lcd.setCursor(0, 1);
+  lcd.print("Hold Btn 3: +15");
 
-  if (limit_15) {
-    pos_15 = myStepper.currentPosition();  // Record position when +15 is hit
-    Serial.print("Position at +15 degrees: ");
-    Serial.println(pos_15);
-  } else {
-    Serial.println("Failed to detect +15 degrees limit switch.");
+  Serial.println("Waiting for button 3 to be held for +15 degrees...");
+
+  while (!limit_15) {
+    // Read the analog value for button presses
+    int analogValue = analogRead(A0);
+    float voltage = analogValue * (5.0 / 1023.0);
+
+    // Check if Button 3 (voltage range for Button 3) is pressed to move to +15 degrees
+    if (voltage >= 1.5 && voltage <= 1.7) {
+      myStepper.setSpeed(500);  // Move in the positive direction
+      myStepper.runSpeed();     // Continue moving as long as the button is pressed
+    } else {
+      myStepper.stop();  // Stop moving if the button is released
+    }
+
+    // Break the loop if the limit is reached
+    if (limit_15) {
+      pos_15 = myStepper.currentPosition();  // Record position when +15 is hit
+      Serial.print("Position at +15 degrees: ");
+      Serial.println(pos_15);
+      lcd.setCursor(0, 1);
+      lcd.print("Reached +15       ");
+      break;
+    }
   }
 
   // Calculate the steps between -45 and +15 degrees
@@ -302,9 +354,13 @@ void run_auto_calibration() {
   // Prevent division by zero
   if (steps_between > 0) {
     steps_per_incline_degree = (float)steps_between / 60.0;  // 60 degrees total
+    lcd.setCursor(0, 1);
+    lcd.print("Calibrated!        ");
   } else {
     steps_per_incline_degree = 0;
     Serial.println("Error: Invalid steps between positions. Check limit switches.");
+    lcd.setCursor(0, 1);
+    lcd.print("Calib Error!       ");
   }
 
   // Save the calculated value to EEPROM
@@ -318,6 +374,50 @@ void run_auto_calibration() {
   Serial.print("Steps per degree: ");
   Serial.println(steps_per_incline_degree);
   Serial.println("Calibration complete.");
+
+  // Clear calibration info from the LCD after a short delay
+  delay(2000);
+  lcd.clear();
+  updateLCD();  // Return to normal display
+}
+
+
+
+bool confirmCalibration() {
+  // Display prompt to confirm calibration
+  lcd.clear();
+  lcd.setCursor(0, 0);
+  lcd.print("Btn 1 to Confirm");
+
+  Serial.println("Waiting for confirmation...");
+
+  delay(500);
+
+  unsigned long startTime = millis();
+  while (millis() - startTime < 15000) {  // 15 second timeout to press the button
+    int analogValue = analogRead(A0);
+    float voltage = analogValue * (5.0 / 1023.0);
+
+    // Check if button 1 (confirm) is pressed
+    if (voltage >= 0.0 && voltage <= 0.1) {
+      Serial.println("Calibration confirmed.");
+      lcd.clear();
+      lcd.setCursor(0, 0);
+      lcd.print("Confirming...");
+      delay(1000);  // Short delay for confirmation feedback
+      return true;  // Proceed with calibration
+    }
+
+    // If any other button is pressed, cancel calibration
+    if (voltage > 0.1 && voltage < 4.0) {
+      Serial.println("Calibration canceled by user.");
+      return false;  // Cancel calibration
+    }
+  }
+
+  // If no button is pressed within 15 seconds, cancel
+  Serial.println("Calibration timed out.");
+  return false;  // Cancel calibration
 }
 
 
@@ -419,16 +519,23 @@ void handleLostSteps(int unexpectedPosition) {
   myStepper.stop();
   movingToSetpoint = false;
 
-  // Log the error and notify the user
+  // Log the error and notify the user via LCD
   Serial.print("Error: Limit switch triggered unexpectedly at position: ");
   Serial.println(unexpectedPosition);
 
-  // Optional: Initiate recalibration or rehoming to a known position
+  // Display error message on LCD
+  lcd.clear();
+  lcd.setCursor(0, 0);
+  lcd.print("Error: Lost Steps!");
+  lcd.setCursor(0, 1);
+  lcd.print("Recalibrating...");
+
+  // Delay before recalibration to give time for the user to notice
+  delay(5000);  // 5-second delay to show the error on LCD
+
+  // Optional: Initiate recalibration
   Serial.println("Initiating recalibration...");
   run_auto_calibration();  // Recalibrate to realign the motor
-
-  // Alternatively, you can move back to a known safe position
-  // moveToSetpoint(0);  // Rehome to the vertical upright position
 }
 
 
