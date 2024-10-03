@@ -1,0 +1,205 @@
+% !TeX encoding = UTF-8
+% !TeX program  = xelatex
+
+\documentclass[12pt,a4paper,openany]{book} 
+
+%==== Packages ==========================================================
+\usepackage{titlesec}
+\usepackage[typeblock=golden]{stb-titlepage}   
+\usepackage{hyperref}
+\usepackage[table]{xcolor}
+\hypersetup{
+    colorlinks,
+    citecolor=black,
+    filecolor=black,
+    linkcolor=black,
+    urlcolor=black
+}
+
+\usepackage{pdfpages}
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{lscape}
+\usepackage{rotating}
+\usepackage{pdflscape} % For landscape pages
+\usepackage{adjustbox}
+\usepackage{geometry}
+\usepackage{multirow}
+
+%==== Math setup =====================================================
+\usepackage{amsmath}% Advanced math (before fonts)
+
+%==== Font setup =====================================================
+\usepackage{iftex}
+\ifxetex
+    \usepackage[math-style=TeX,
+                bold-style=TeX,
+               ]{unicode-math}
+    \setmainfont{Cambria}% Unicode fonts (Win)                
+    \setsansfont[Scale=MatchLowercase]{Calibri}
+    \setmonofont[Scale=MatchLowercase]{Consolas}
+    \setmathfont{Cambria Math}
+    \defaultfontfeatures{Ligatures=TeX}
+    \let\bm\symbfit
+\else
+    \usepackage[utf8]{inputenc}% Unicode file format
+    \usepackage{textcomp}% Additional text symbols
+    \usepackage[T1]{fontenc}% Type 1 outline fonts
+    \usepackage{bm}% Bold math fonts
+\fi
+\normalfont
+
+%==== Units and numbers ==============================================
+\usepackage{siunitx}% Unit, number and angle output
+    \sisetup{detect-all = true, detect-family = true}
+    \sisetup{output-decimal-marker = {.} ,
+             group-separator = {\,},
+             number-unit-product = {\,},
+             inter-unit-product = \mathord{\cdot},
+             exponent-product = \mathord{\times},
+             separate-uncertainty = true}
+         
+%==== Ref's, Bib's and Nomencl =======================================
+\usepackage{stb-nomencl}% List of symbols 
+    \renewcommand*{\UnitLabel}[1]{~[\,\unit{#1}\,]}
+\usepackage{stb-bib}% Bibliography (natbib internally)
+    \bibliographystyle{stb-bib-eng-a}
+    \renewcommand\bibfont{\small}
+    \renewcommand\bibsection{\chapter{\bibname}}
+
+%==== Tables + Graphics + Color =====================================
+\usepackage{array}% Extended table defs 
+    \setlength{\extrarowheight}{2pt}
+\usepackage{longtable}% Tables can break over pages
+\usepackage[font=small]{caption}% Customize captions  
+\usepackage[table]{xcolor}% Color setup + colortbl 
+
+\setlength\parindent{0pt}
+    
+%==== Extra defs for template ========================================
+\makeatletter
+%---- TOC entries and case
+    \renewcommand\contentsname{Table of contents}
+    \renewcommand\listfigurename{List of figures}
+    \renewcommand\listtablename{List of tables}
+    \renewcommand\bibname{List of references}
+    
+    \renewcommand\tableofcontents{\chapter*{\contentsname}\@starttoc{toc}}
+    \renewcommand\listoffigures{\chapter{\listfigurename}\@starttoc{lof}}
+    \renewcommand\listoftables{\chapter{\listtablename}\@starttoc{lot}}
+
+%---- Plagiarism signatures
+    \newcommand\tstrut[1][4ex]{\rule{0pt}{#1}}
+    \newcommand\tdots[1][5cm]{\makebox[#1]{\dotfill}}
+
+%---- Summary head line
+    \newcommand\sumheading{%
+        \rowcolor[gray]{.9}%
+        \centering\arraybackslash%
+        \bfseries\normalsize}
+
+%==== User Defs ======================================================
+%
+% Please insert user defined commands here
+% and NOT in the document itself!
+%
+%
+\makeatother
+
+%==== Title Page =====================================================
+\title{\textbf{Development of a Rotary Climbing Wall}\\[2ex]
+       \large Mechatronic Project 478\\Final Report Draft\\[2ex]}                   
+\author{\Large Author: Jonathan van der Riet\\ 
+        \large 23583290 \\[5ex]
+        \Large Supervisor: Dr Michael Owen}                
+\address{Department of Mechanical and Mechatronic Engineering\\
+        Stellenbosch University \\
+        Private Bag X1, Matieland 7602, South Africa.}
+\date{2024/03/15}                             
+\Copyright{2024}{Stellenbosch University.\\ All rights reserved.}
+
+%==== Title Format ===================================================
+\usepackage{titlesec}
+\titleformat{\chapter}[display]
+{\normalfont\huge\bfseries}{\chaptertitlename\ \thechapter}{20pt}{\Huge}   
+\titlespacing*{\chapter}{0pt}{-50pt}{20pt}
+\titlespacing*{\section}{0pt}{15pt}{10pt}
+
+%==== Main Document ==================================================
+\setcounter{secnumdepth}{3}
+\setcounter{tocdepth}{2}
+\raggedbottom
+\begin{document}  
+
+\frontmatter%---------------------------------------------------------                    
+\maketitle 
+
+\include{chaps-front/chap-plagiarism}
+\include{chaps-front/chap-summary}
+
+%\include{chaps-front/chap-acknowledge}
+
+% Use \chapter*{} before TOC
+\tableofcontents
+% Use \chapter{} after TOC
+
+\listoffigures
+\listoftables
+%\include{chaps-front/chap-symbols}
+
+\mainmatter%----------------------------------------------------------
+\numberwithin{figure}{chapter}
+\numberwithin{table}{chapter}
+
+\include{chaps-main/chap-intro}
+\include{chaps-main/chap-literature}
+\include{chaps-main/chap-technology}
+\include{chaps-main/chap-conceptdesign}
+\include{chaps-main/chaps-detaildesign}
+\include{chaps-main/chaps-testing}
+\include{chaps-proposal/chaps-risk-asses}
+%\include{chaps-main/chap-content-A}
+\include{chaps-main/chap-conclusion}
+
+% Start the appendices
+\appendix % Switch to appendix mode
+
+% Change chapter numbering style to letters
+\renewcommand{\thechapter}{\Alph{chapter}}
+
+% Redefine \chaptertitlename to "Appendix"
+\renewcommand{\chaptertitlename}{Appendix}
+
+% Ensure section numbering is \thechapter.\arabic{section}
+\renewcommand{\thesection}{\thechapter.\arabic{section}}
+
+% Redefine \titleformat for chapters in the appendix
+\titleformat{\chapter}[display]
+{\normalfont\huge\bfseries}{\chaptertitlename\ \thechapter}{20pt}{\Huge}
+\titlespacing*{\chapter}{0pt}{-50pt}{20pt}
+\titlespacing*{\section}{0pt}{15pt}{10pt}
+
+% Adjust figure and table numbering if necessary
+\numberwithin{figure}{chapter}
+\numberwithin{table}{chapter}
+\renewcommand{\thefigure}{\thechapter.\arabic{figure}}
+\renewcommand{\thetable}{\thechapter.\arabic{table}}
+
+% Include each appendix as separate chapters
+\include{chaps-append/chap-FEM-Verification}
+\include{chaps-append/chap-Inclination-Caculations}
+\include{chaps-append/chap-Braking-Calculations}
+\include{chaps-append/chap-RotatingSurface-Calculations}
+\include{chaps-append/chap-Planning-Details}
+\include{chaps-append/chap-Self-ECSA}
+\include{chaps-append/chap-End-of-Life}
+\include{chaps-append/chap-Price-Data}
+\include{chaps-append/chap-Calculations}
+
+% Now include the back matter (bibliography, index, etc.)
+\backmatter%----------------------------------------------------------
+\bibliography{bib/bib-sample}
+
+\end{document}

@@ -1,0 +1,150 @@
+\chapter{Final Design}
+\label{chap:detailed_design}
+
+This chapter presents the final design process for the rotating climbing wall, focusing on the key subsystems, as well as the integration of these systems. Each main component was selected and designed to meet the requirements set out in Chapter \ref{chap:concept_design}. Structural verification was carried out through both analytical and simulation-based approaches.
+
+Due to the complex nature of verifying stress and displacement in many of the mechanical systems, the native Finite Element Method (FEM) package in Autodesk Fusion 360 was employed to perform static simulations. To ensure the correct usage of the package, a verification process was conducted (as detailed in Appendix~\ref{appx:FEM-verification}). A simulation was performed on a simple test case, where the FEM package overestimated stress by just over 5\% and displacement within 0.6\%. These results provided confidence to utilize the package for more complex simulations.
+
+\section{Main Dimensions}
+
+As discussed in the technology review (see Chapter~\ref{chap:technology_review}), typical market products for rotating climbing walls vary in size. The largest, the Treadwall Max6/12, features a climbing surface measuring 1.83\,m in width and 3.1\,m in height, while the smallest, the Treadwall Kore4/11, measures 1.22\,m in width and 2.75\,m in height.
+
+For this design, a middle ground was chosen, with dimensions of approximately 1.6\,m in width and 2.9\,m in height. This size ensures that the wall is not so small that it becomes ineffective for training or unsuitable for taller climbers, yet not so large that it significantly increases the development cost of the prototype.
+
+All major components of the design—including shaft widths, upright beams, crossbeams, and other structural elements—were guided by these chosen dimensions.
+
+\section{Braking System}
+
+The braking system was designed to include an active braking component secured to the top crossbeam. Due to space limitations, the bottom crossbeam was reserved for the tilting system, necessitating the placement of the braking mechanism on the top crossbeam. This subsystem utilizes a pulley-driven AC servomotor for electromagnetic braking, with the main driven shaft mounted through a series of three deep groove flange ball bearings. These bearings are \textbf{Koyo UCF205 Flange unit bearings}, chosen for their ability to handle the calculated loads and ease of mounting. The bearings are mounted via laser-cut and bent sheet metal brackets to the top crossbeam. Figure~\ref{fig:brake-system-final-design} shows the final braking system CAD representation.
+
+\subsection{Main Shafts}
+
+To maintain a constant speed on the rotating surface, a braking torque of 210\,Nm was required on the top main shaft. This calculation was based on a climber’s weight estimate of 1400\,N, providing an added safety margin (excluding friction). The downward force on each sprocket of the shaft was calculated to be 1.11\,kN (calculations can be found in Appendix \ref{calcs:main_braking_shaft}).
+
+Bright mild steel was selected as the shaft material due to its cost-effectiveness and strong mechanical properties. Finite Element Analysis (FEA) was performed in Autodesk Fusion 360 on both 30\,mm and 25\,mm diameter solid shafts, yielding safety factors of 3.47 and 2.24, respectively. Based on these results, a 25\,mm solid bright steel shaft was chosen for both the top and bottom main shafts.
+
+Figure~\ref{fig:FEM-mainshaft} displays the FEA results for the shaft, revealing a stress concentration toward the middle. To address this, an extra Koyo UCF205 bearing was placed near the middle of the shaft to provide additional support.
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.8\linewidth]{figs/final_design/FEMShaft.png}
+    \caption{FEA Results of 25\,mm Diameter Main Shaft}
+    \label{fig:FEM-mainshaft}
+\end{figure}
+
+\subsection{Brackets and Bearings}
+
+The brackets were designed to be laser-cut and bent from mild steel due to its favorable cost-to-strength ratio. Stainless steel was considered for its extra strength and corrosion resistance but was ruled out since the wall will be placed indoors, and mild steel can be painted to prevent rust. Due to the complexity of the bracket shapes, FEA was performed using 6\,mm thick mild steel, simulating the worst-case scenario of holding the entire weight of the climber, panels, and chain tension. The safety factor at a vertical wall inclination was 5.93, while at a $-45^\circ$ inclination, the safety factor was 1.33. Although slightly low, the high load estimate and prototype nature of the wall justify this. Figure~\ref{fig:FEM-bracket} shows the FEA results of the bracket at a $45^\circ$ incline. Further calculations can be found in Appendix \ref{calcs:brackets_bearings}.
+
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=0.8\linewidth]{figs/final_design/FEMBracket45.png}
+    \caption{FEA Results of Bracket at $45^\circ$ Incline}
+    \label{fig:FEM-bracket}
+\end{figure}
+
+\subsection{Motor and Belt Drive System}
+
+The top shaft must resist approximately 50\,Nm of torque, factoring in friction losses of around 61\,Nm (for a lighter climber weight of 90\,kg). Calculations for this are found in Appendix \ref{calcs:motor_belt}. This system prioritizes cost control while maintaining sufficient safety.
+
+An AC servomotor and driver system was selected; the \textbf{MiGE 130ST-M10010} motor was chosen for its suitable specifications (see Table~\ref{tab:motor_specs}). A basic calculation was performed to determine the necessary torque reduction ratio after accounting for mechanical losses.
+
+\begin{table}[H]
+    \centering
+    \begin{tabular}{|l|c|}
+        \hline
+        \textbf{Motor Model} & 130ST-M10010 \\
+        \hline
+        Rated Power (kW) & 1.0 \\
+        \hline
+        Rated Voltage (V) & 220 \\
+        \hline
+        Rated Current (A) & 4.5 \\
+        \hline
+        Rated Speed (rpm) & 1000 \\
+        \hline
+        Holding Torque (Nm) & 10 \\
+        \hline
+        Peak Torque (Nm) & 20 \\
+        \hline
+        Voltage Constant (V/krpm) & 140 \\
+        \hline
+        Torque Coefficient (Nm/A) & 2.2 \\
+        \hline
+        Rotor Inertia (kg$\cdot$m$^2$) & $1.94 \times 10^{-3}$ \\
+        \hline
+        Line-Line Resistance ($\Omega$) & 2.7 \\
+        \hline
+        Line-Line Inductance (mH) & 8.8 \\
+        \hline
+        Mechanical Time Constant (ms) & 3.26 \\
+        \hline
+        Weight (kg) & 11.5 \\
+        \hline
+    \end{tabular}
+    \caption{MiGE Motor Specifications}
+    \label{tab:motor_specs}
+\end{table}
+
+With a peak holding torque of 20\,Nm, a continuous torque of 10\,Nm, and a power rating of 1\,kW, this motor is well-suited for the application when paired with the appropriate gear reduction system.
+
+\subsubsection*{Torque Reduction Ratio Calculation}
+
+The required torque at the shaft is:
+
+\[
+T_{\text{shaft}} = 45.44\ \text{Nm}
+\]
+
+The motor's continuous torque is:
+
+\[
+T_{\text{motor}} = 10\ \text{Nm}
+\]
+
+Therefore, the necessary gear reduction ratio (\( R \)) is:
+
+\[
+R = \frac{T_{\text{shaft}}}{T_{\text{motor}}} = \frac{45.44\ \text{Nm}}{10\ \text{Nm}} = 4.544
+\]
+
+A gear reduction ratio of approximately 5:1 is required to meet the torque demands. The SKF Power Transmission Belt Software \cite{SKF_BeltDriveTool} was used to select an M5 timing belt and a 90-tooth to 18-tooth pulley system, providing the needed 5:1 gear ratio. This results in a continuous torque of 50\,Nm and a maximum torque of 100\,Nm on the main shaft, meeting the main shaft torque and speed criteria. Belt calculations are found in Appendix \ref{calcs:motor_belt}.
+
+\subsection{Braking Resistor}
+
+To dissipate the energy generated by the motor due to the climber's weight and resulting rotation, a braking resistor is employed. The resistor is connected to the designated output pins on the motor driver, with the required values calculated in Appendix \ref{calcs:braking_resistor}. Finding a braking resistor with exactly these specifications is challenging, so the braking resistor that was purchased was overspecified. Table~\ref{tab:braking-resistor-specs} shows the calculated values and the specifications of the selected resistor.
+
+\begin{table}[H]
+    \centering
+    \begin{tabular}{|l|c|c|}
+        \hline
+        \textbf{Specification} & \textbf{Calculated Value} & \textbf{Selected Resistor Value} \\
+        \hline
+        Power (W) & 227.2 & 1000 \\
+        \hline
+        Resistance ($\Omega$) & 2.19 & 16 \\
+        \hline
+    \end{tabular}
+    \caption{Braking Resistor Specifications}
+    \label{tab:braking-resistor-specs}
+\end{table}
+
+Figure~\ref{fig:brake-system-final-design} illustrates the final CAD design of the braking system.
+
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=1\linewidth]{figs/final_design/BrakingSyst.pdf}
+    \caption{Braking System Final CAD Design}
+    \label{fig:brake-system-final-design}
+\end{figure}
+
+\section{Final Assembly}
+
+The final CAD assembly is shown below, though the main components are shielded by panels. Additional renders with panels removed will be included in the final report. The chain has been selected but is yet to be added to the CAD model.
+
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=1.0\linewidth]{figs/final_design/Main_Assembly_CAD.pdf}
+    \caption{Full Assembly Final CAD Design}
+    \label{fig:full-assembly-final-design}
+\end{figure}
