@@ -1,5 +1,200 @@
+\chapter{Incline System Calculations}
+
+\section{Linear Actuator Calculations}
+\label{calcs:linear-actuator}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\linewidth]{chaps-append/calcs/linear_actuator_calcs.png}
+\end{figure}
+
+\section{Double Gear Down System Calculations}
+\label{calcs:incline-system}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\linewidth]{chaps-append/calcs/tilting_max_torque_calcs.png}
+\end{figure}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\linewidth]{chaps-append/calcs/rack_pinion_calcs.png}
+\end{figure}
+
+\subsection*{Safety Factor Calculation for Pinion Teeth}
+\label{calcs:pinion-SF}
+\small % Reduce font size for compactness
+
+Given the following parameters:
+\begin{itemize}
+    \item Applied load: \( F = 1.75 \, \text{kN} = 1750 \, \text{N} \)
+    \item Pitch radius: \( r_{\text{pinion}} = 24 \, \text{mm} \)
+    \item Face width: \( b = 6 \, \text{mm} \)
+    \item Module: \( m = 4 \, \text{mm} \)
+    \item Material: Mild steel (\( \sigma_{\text{yield}} = 250 \, \text{MPa} \))
+    \item Lewis form factor: \( Y \approx 0.3 \)
+\end{itemize}
+
+The bending stress is calculated using the Lewis equation:
+\[
+\sigma_{\text{bending}} = \frac{F \cdot r_{\text{pinion}}}{b \cdot m \cdot Y}
+\]
+Substituting the values:
+\[
+\sigma_{\text{bending}} = \frac{1750 \cdot 24}{6 \cdot 4 \cdot 0.3} = \frac{42000}{7.2} = 5833.33 \, \text{kPa} = 5.83 \, \text{MPa}
+\]
+
+Now, the safety factor is:
+\[
+\text{SF} = \frac{\sigma_{\text{yield}}}{\sigma_{\text{bending}}} = \frac{250 \, \text{MPa}}{5.83 \, \text{MPa}} \approx 42.88
+\]
+
+Thus, the safety factor for the pinion teeth is approximately \( \text{SF} \approx 42.88 \), indicating a very high safety margin under the given load.
+
+\normalsize % Return to normal font size
+
+\section{Stepper Motor Calculations}
+\label{calcs:stepper-motor}
+
+\small % Reduce font size for compactness
+
+\subsection*{Torque Required for Tilting}
+
+
+\[
+T_{\text{shaft}} = 42 \, \text{Nm}, \quad \text{Worm Gear Ratio:} \, 28:1
+\]
+
+\subsection*{Gear Ratio Calculations}
+
+\[
+T_{\text{motor}} = \frac{T_{\text{shaft}}}{\text{Gear Ratio}} = \frac{42}{28} = 1.5 \, \text{Nm}
+\]
+\[
+N_{\text{motor}} = 80 \, \text{rpm} = 8.377 \, \text{rad/s}
+\]
+\[
+u_{\text{tot}} = u_{\text{tilt1}} \cdot u_{\text{tilt2}} = 16.67 \cdot 28 = 466.76
+\]
+\[
+T_{\text{stepper}} = \frac{M_{\text{tilt}}}{u_{\text{tot}}} = \frac{874.03}{466.76} = 1.87 \, \text{Nm}
+\]
+
+\subsection*{Travel Time to Max Incline}
+
+\[
+\text{Travel angle} = 45^\circ + 15^\circ = 60^\circ
+\]
+\[
+N_{\text{tilt}} = \frac{N_{\text{motor}}}{u_{\text{tilt1}} \cdot u_{\text{tilt2}}} = \frac{80}{466.76} = 0.171 \, \text{rpm}
+\]
+\[
+t_{\text{tilt}} = \frac{\text{Travel angle}}{360^\circ} \cdot \frac{60}{N_{\text{tilt}}} = \frac{60^\circ}{360^\circ} \cdot \frac{60}{0.171} \approx 29.24 \, \text{seconds}
+\]
+
+Speed and torque well within range of Nema 23 stepper motor which has a max holding torque of 2Nm and speed of 1000 rpm.
+
+\normalsize % Return to normal font size
+
+\section{Worm Gear Bracket FEM Analysis}
+\label{calcs:worm-bracket-fem}
+Finite Element Method (FEM) analysis was conducted on the worm gear bracket system using the maximum calculated force from Section~\ref{calcs:incline-system}. The simulation was run with the force applied both upwards and downwards. As shown in Figure~\ref{fig:FEM-incline-brackets}, the maximum stress observed in the system is 209\,MPa. Given the yield strength of mild steel is approximately 250\,MPa, the safety factor for the bracket system is calculated as:
+
+\[
+\text{Safety Factor} = \frac{\sigma_{\text{yield}}}{\sigma_{\text{max}}} = \frac{250 \, \text{MPa}}{209 \, \text{MPa}} \approx 1.2
+\]
+
+This indicates that the worm gear bracket system operates with a safety factor of approximately 1.2, which is adequate for the specified load conditions.
+
+
+
+\section{Incline Shaft FEM Analysis}
+\label{calcs:incline-shaft}
+The torque values calculated above were used in a Fusion 360 static FEM analysis with the following results:
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\linewidth]{chaps-append/calcs/tilt_shaft_FEM.png}
+\end{figure}
+
+
+
+
 \chapter{Braking System Calculations}
 \label{appx:braking-calcs}
+
+\section{Brake Disk Heating Analysis with Natural Convection}
+\label{calcs:brake-disk-heat}
+This section analyzes the brake disk's temperature rise due to frictional heating using a lumped mass model and a detailed simulation from Fusion 360, both assuming natural convection as the primary cooling mechanism.
+
+\subsection*{Lumped Mass Model}
+A lumped mass approach was used to estimate the temperature rise of the brake disk. 
+This analysis was based on the lumped mass method, as described in \cite{cengel2015heat}.
+The parameters for the analysis are:
+\begin{itemize}
+    \item Mass: \( m = 0.054 \, \text{kg} \)
+    \item Specific heat: \( c_p = 897 \, \frac{\text{J}}{\text{kg°C}} \)
+    \item Surface area: \( A = 0.02997 \, \text{m}^2 \)
+    \item Heat input: \( Q_{\text{in}} = 1200 \, \text{W} \)
+    \item Natural convection coefficient: \( h_{\text{natural}} = 25 \, \frac{\text{W}}{\text{m}^2 \cdot \text{K}} \)
+\end{itemize}
+
+The lumped mass heat balance equation is:
+\[
+Q_{\text{in}} - Q_{\text{out}} = m c_p \frac{dT}{dt}, \quad Q_{\text{out}} = h_{\text{natural}} A (T - T_{\text{ambient}})
+\]
+
+The following Python script was used to calculate the temperature rise over a period of 300 seconds:
+
+\subsection*{Python Script}
+
+\small % Smaller font size for the Python script
+\begin{verbatim}
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Constants
+m_brake = 0.054  # kg
+c_brake = 897  # J/kg°C
+h_natural = 25  # W/m²·K
+A_brake = 0.02997  # m²
+Q_in = 1200  # W
+T_ambient = 300  # K
+
+# Time parameters
+time = np.linspace(0, 300, 1000)  # 300 seconds
+dt = time[1] - time[0]
+T = np.zeros_like(time)
+T[0] = T_ambient
+
+# Calculate temperature rise over time
+for i in range(1, len(time)):
+    Q_out = h_natural * A_brake * (T[i-1] - T_ambient)
+    dTdt = (Q_in - Q_out) / (m_brake * c_brake)
+    T[i] = T[i-1] + dTdt * dt
+
+# Plot the temperature rise over time
+plt.plot(time, T - 273.15, label="Natural Convection")
+plt.axhline(y=650, color='blue', linestyle='--', label="Max Allowable Temp (650°C)")
+plt.xlabel('Time (s)')
+plt.ylabel('Temperature (°C)')
+plt.title('Brake Disk Temperature Rise Over Time')
+plt.legend()
+plt.grid(True)
+plt.show()
+\end{verbatim}
+\normalsize % Return to normal font size
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\linewidth]{chaps-append/calcs/disk_brake_heat_python.png}
+\end{figure}
+
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\linewidth]{chaps-append/calcs/disk_brake_heat_simulation.png}
+    \caption{Fusion 360 Simulation: Brake Disk Temperature with Natural Convection}
+    \label{fig:brake-fusion-simulation}
+\end{figure}
+
 
 \section{Main Shaft Calculations}
 \label{calcs:main_braking_shaft}
@@ -206,3 +401,17 @@ Finally, the braking resistor value is calculated as:
 \[
 R_{\text{brake}} = \frac{V_{\text{max\_speed}}}{I_{\text{brake}}} = \frac{22.26\ \text{V}}{10.21\ \text{A}} = 2.18\ \Omega
 \]
+
+
+
+\chapter{Rotating Surface Calculations}
+
+\section{Chain Calculations}
+\label{calcs:chain}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\linewidth]{chaps-append/calcs/chain-length-calcs.png}
+\end{figure}
+
+
+

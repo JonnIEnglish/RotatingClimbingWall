@@ -27,8 +27,8 @@ The stakeholder requirements define the intended services of the system and the 
 \textbf{Number}  & \textbf{Stakeholder} & \textbf{Description} & \textbf{Priority} \\
 \hline
 SR1  & End-user & Simulate continuous climbing & Must Have \\
-SR2  & End-user & Incline adjustment for different difficulty levels & Must Have \\
-SR3  & End-user & User-adjustable speed control to accommodate various training intensities & High \\
+SR2  & End-user & Incline adjustment for different difficulty levels & High \\
+SR3  & End-user & User-adjustable speed control to accommodate various training intensities & Must Have \\
 SR4  & End-user, Safety Officer & Durable and safe construction to withstand continuous use & High \\
 SR5  & End-user, Safety Officer & Emergency stop feature for immediate halting of the wall for user safety & Must Have \\
 SR6  & End-user & Large enough surface for comfortable climbing experience & High \\
@@ -108,15 +108,13 @@ The functional requirements detailed previously outline the actions the rotating
 
 \subsection{Inclination Adjustment System}
 
-\subsubsection{Introduction}
-
 The inclination adjustment system allows for altering the climbing angle of the wall, making it more beginner-friendly with less steep angles or more challenging with overhangs for advanced climbers and intense training sessions. This subsystem addresses FR2 (Incline control and adjustment) and PR2 and PR3 from the performance requirements.
 
 \subsubsection{Concept Generation}
 
 \paragraph{IAS1: Linear Actuation}
 
-This concept uses linear actuators connected to the frame of the climbing wall to adjust its angle. The actuators can be controlled electronically, allowing for precise and automated inclination adjustments through a user interface.
+This concept uses linear actuators connected to the frame of the climbing wall to adjust its angle. The actuators can be controlled electronically, allowing for precise and automated inclination adjustments through a user interface. Basic calculations (see Appendix~\ref{calcs:linear-actuator}) were performed which indicate that very high-force actuators would be needed for this sub-system, making it an expensive choice.
 
 \begin{figure}[H]
     \centering
@@ -128,19 +126,18 @@ This concept uses linear actuators connected to the frame of the climbing wall t
 \textbf{Advantages:}
 \begin{itemize}
     \item Precise and automated control over inclination.
-    \item Smooth operation with electronic integration.
-    \item Can be integrated with safety mechanisms.
+    \item Fairly safe method of inclination.
+    \item Fairly simple design.
 \end{itemize}
 
 \textbf{Disadvantages:}
 \begin{itemize}
-    \item Higher cost due to actuators and control systems.
-    \item Increased complexity in design and maintenance.
+    \item Higher cost due to actuators.
+    \item Decreased range of motion due to actuator movement limitations.
 \end{itemize}
 
 \paragraph{IAS2: Hand-Crank Inclination}
-
-This manual method employs a hand-crank mechanism connected to the wall's support structure, allowing users to adjust the inclination manually.
+This manual method incorporates a large curved rack fastened to the base frame and a hand-crank powered pinion driving the angle adjustment of the rest of the system.
 
 \begin{figure}[H]
     \centering
@@ -152,19 +149,19 @@ This manual method employs a hand-crank mechanism connected to the wall's suppor
 \textbf{Advantages:}
 \begin{itemize}
     \item Low cost and simplicity.
-    \item Minimal electronic components, reducing potential failures.
 \end{itemize}
 
 \textbf{Disadvantages:}
 \begin{itemize}
     \item Requires manual effort, which may be inconvenient.
-    \item Lacks precision and may need additional mechanisms to secure the angle.
-    \item Safety concerns if not properly locked in place.
+    \item Lacks precision and repeatability of training inclination angle.
+    \item Safety concerns due to operator being very near the machine. Potential for spinning handle if operator loses control.
+    \item Extra mechanism/pin required to lock angle in place.
 \end{itemize}
 
 \paragraph{IAS3: Worm Gear Automatic Inclination}
 
-This concept uses a motor-driven worm gear mechanism to adjust the inclination. The worm gear provides self-locking capabilities, preventing unintended movement, and allows for precise electronic control.
+This concept is very similar to the manual adjustment concept with the addition of a motor-driven worm gear mechanism to adjust the inclination. The worm gear provides self-locking capabilities, preventing unintended movement, and allows for precise electronic control.
 
 \begin{figure}[H]
     \centering
@@ -177,56 +174,24 @@ This concept uses a motor-driven worm gear mechanism to adjust the inclination. 
 \begin{itemize}
     \item Precise control with electronic integration.
     \item Self-locking mechanism enhances safety.
-    \item Durable and reliable over long-term use.
 \end{itemize}
 
 \textbf{Disadvantages:}
 \begin{itemize}
     \item Moderate cost due to mechanical components and motor.
     \item Increased complexity compared to manual systems.
+    \item Increased maintenance as worm gear should be kept aligned and lubricated.
 \end{itemize}
 
 \subsubsection{Concept Evaluation and Selection}
 
-\paragraph{Selection Criteria}
-
-\begin{enumerate}
-    \item Ease of Operation (Weight: 1)
-    \item Cost (Weight: 2)
-    \item Complexity (Weight: 2)
-    \item Safety Mechanisms (Weight: 3)
-    \item Reliability (Weight: 2)
-    \item Range of Motion (Weight: 1)
-    \item Maintenance Requirement (Weight: 1)
-\end{enumerate}
-
 \paragraph{Decision Matrix}
 
 \begin{table}[H]
-\centering
-\caption{Inclination Adjustment System Decision Matrix}
-\label{tab:ias_decision_matrix}
-\begin{tabular}{|p{0.1\linewidth}|p{0.3\linewidth}|c|c|c|}
-\hline
-\textbf{Criterion} & \textbf{Description} & \textbf{IAS1} & \textbf{IAS2} & \textbf{IAS3} \\
-\hline
-Ease of Operation (1) & User effort required to adjust inclination & +1 & -1 & +1 \\
-\hline
-Cost (2) & Total cost of implementation & -1 & +1 & 0 \\
-\hline
-Complexity (2) & Complexity of design and implementation & -1 & +1 & 0 \\
-\hline
-Safety Mechanisms (3) & Ability to prevent unintended movement & +1 & -1 & +1 \\
-\hline
-Reliability (2) & Likelihood of consistent performance over time & 0 & +1 & +1 \\
-\hline
-Range of Motion (1) & Ability to achieve desired angles & +1 & -1 & +1 \\
-\hline
-Maintenance Requirement (1) & Frequency and difficulty of maintenance & +1 & -1 & +1 \\
-\hline
-\textbf{Weighted Total} &  & \textbf{+4} & \textbf{-1} & \textbf{+8} \\
-\hline
-\end{tabular}
+    \centering
+    \includegraphics[width=1\linewidth]{tables/IAS_dec_matrix.pdf}
+    \caption{Inclination Adjustment System Decision Matrix}
+    \label{tab:ias_decision_matrix}
 \end{table}
 
 \paragraph{Selection Justification}
@@ -254,21 +219,21 @@ This concept uses a hydraulic motor/pump operating in reverse to provide resista
 
 \textbf{Advantages:}
 \begin{itemize}
-    \item Simple mechanical system without electronic controls.
+    \item Does not require electronic components to operate.
     \item Robust and durable components.
 \end{itemize}
 
 \textbf{Disadvantages:}
 \begin{itemize}
-    \item Lacks precise electronic control.
+    \item Lacks precise speed control (will change speed depending on weight of person).
     \item Manual adjustments required for speed changes.
     \item Potential for leaks and maintenance issues.
+    \item Expensive overall system.
 \end{itemize}
 
 \paragraph{BS2: Disk Braking System}
 
 This concept adapts an off-the-shelf disk brake system from a motorcycle or mountain bike, controlled automatically to maintain constant rotational speed. Sensors monitor the current speed, and a PID controller adjusts the brake caliper to achieve the desired speed.
-
 
 \textbf{Advantages:}
 \begin{itemize}
@@ -285,64 +250,34 @@ This concept adapts an off-the-shelf disk brake system from a motorcycle or moun
 
 \textbf{Heat Analysis:}
 
-A lumped sum analysis and heat simulation in Fusion 360 were performed to evaluate the thermal performance of the disk brake system. The results indicated that the brake pads and disk would reach unsafe temperatures after extended use, compromising safety and functionality. This thermal limitation makes BS2 unsuitable for continuous operation required in this application.
+A lumped sum analysis and heat simulation in Fusion 360 were performed to evaluate the thermal performance of the disk brake system (see \ref{calcs:brake-disk-heat}). The results indicated that the brake pads and disk would reach unsafe temperatures after extended use, compromising safety and functionality. This thermal limitation makes BS2 unsuitable for continuous operation required in this application.
 
 \paragraph{BS3: Electromagnetic Braking System}
 
 This concept uses an electric motor and driver to provide electromagnetic braking. The system employs a braking resistor to dissipate the energy generated by the climber-induced rotation.
 
-
 \textbf{Advantages:}
 \begin{itemize}
-    \item Precise electronic control over speed.
+    \item Precise electronic control over speed irrespective of climber's weight.
+    \item Ability to automatically adjust speed to match the speed of the climber.
     \item Smooth and consistent braking performance.
     \item Low maintenance with no physical contact components.
 \end{itemize}
 
 \textbf{Disadvantages:}
 \begin{itemize}
-    \item Higher initial cost due to motor and control systems.
-    \item Requires electrical expertise for implementation.
+    \item Slightly higher initial cost due to motor and control systems.
 \end{itemize}
 
 \subsubsection{Concept Evaluation and Selection}
 
-\paragraph{Selection Criteria}
-
-\begin{enumerate}
-    \item Ease of Integration (Weight: 2)
-    \item Cost (Weight: 3)
-    \item Maintenance Requirement (Weight: 2)
-    \item Precision of Control (Weight: 3)
-    \item Safety (Weight: 3)
-    \item Reliability (Weight: 2)
-\end{enumerate}
-
 \paragraph{Decision Matrix}
 
 \begin{table}[H]
-\centering
-\caption{Braking System Decision Matrix}
-\label{tab:bs_decision_matrix}
-\begin{tabular}{|p{0.1\linewidth}|p{0.3\linewidth}|c|c|c|}
-\hline
-\textbf{Criterion} & \textbf{Description} & \textbf{BS1} & \textbf{BS2} & \textbf{BS3} \\
-\hline
-Ease of Integration (2) & Complexity of integrating into system & 0 & +1 & +1 \\
-\hline
-Cost (3) & Total cost of implementation & -1 & +1 & -1 \\
-\hline
-Maintenance Requirement (2) & Frequency and difficulty of maintenance & -1 & -1 & +1 \\
-\hline
-Precision of Control (3) & Ability to precisely control speed & -1 & 0 & +1 \\
-\hline
-Safety (3) & Safety considerations during operation & 0 & -1 & +1 \\
-\hline
-Reliability (2) & Likelihood of consistent performance over time & +1 & -1 & +1 \\
-\hline
-\textbf{Weighted Total} &  & \textbf{-2} & \textbf{0} & \textbf{+8} \\
-\hline
-\end{tabular}
+    \centering
+    \includegraphics[width=1\linewidth]{tables/BR_dec_matrix.pdf}
+    \caption{Braking System Decision Matrix}
+    \label{tab:bs_decision_matrix}
 \end{table}
 
 \paragraph{Selection Justification}
@@ -357,16 +292,15 @@ The rotating surface is the central component of the system, providing the physi
 
 \subsubsection{Concept Generation}
 
-\paragraph{RS1: Conveyor Chain-Driven Panels}
+\paragraph{RS1: Conveyor Chain Driven Panels}
 
 This concept uses a series of interconnected panels attached to conveyor chains on either side. The chains are looped over sprockets at the top and bottom, driven by the main shafts. The panels form the climbing surface and are pulled along by the chains.
-
 
 \textbf{Advantages:}
 \begin{itemize}
     \item Strong and robust connection between panels and drive system.
     \item Capable of handling high loads from climbers.
-    \item Reliable operation with well-understood technology.
+    \item Reliable operation.
 \end{itemize}
 
 \textbf{Disadvantages:}
@@ -396,55 +330,18 @@ This concept employs a continuous rubber conveyor belt with climbing holds attac
 
 \subsubsection{Concept Evaluation and Selection}
 
-\paragraph{Selection Criteria}
-
-\begin{enumerate}
-    \item Load Capacity (Weight: 3)
-    \item Durability (Weight: 2)
-    \item Cost (Weight: 2)
-    \item Ease of Maintenance (Weight: 1)
-    \item Surface Quality (Weight: 2)
-    \item Complexity of Construction (Weight: 1)
-\end{enumerate}
-
 \paragraph{Decision Matrix}
 
 \begin{table}[H]
-\centering
-\caption{Rotating Surface Decision Matrix}
-\label{tab:rs_decision_matrix}
-\begin{tabular}{|p{0.1\linewidth}|p{0.3\linewidth}|c|c|}
-\hline
-\textbf{Criterion} & \textbf{Description} & \textbf{RS1} & \textbf{RS2} \\
-\hline
-Load Capacity (3) & Ability to support climber weight & +1 & -1 \\
-\hline
-Durability (2) & Resistance to wear and tear & +1 & 0 \\
-\hline
-Cost (2) & Total cost of implementation & -1 & +1 \\
-\hline
-Ease of Maintenance (1) & Frequency and difficulty of maintenance & 0 & +1 \\
-\hline
-Surface Quality (2) & Smoothness and suitability for climbing & +1 & +1 \\
-\hline
-Complexity of Construction (1) & Difficulty in manufacturing and assembly & -1 & +1 \\
-\hline
-\textbf{Weighted Total} &  & \textbf{+5} & \textbf{+2} \\
-\hline
-\end{tabular}
+    \centering
+    \includegraphics[width=1\linewidth]{tables/RS_dec_matrix.pdf}
+    \caption{Rotating Surface Decision Matrix}
+    \label{tab:rs_decision_matrix}
 \end{table}
 
 \paragraph{Selection Justification}
 
 RS1 (Conveyor Chain-Driven Panels) is the preferred concept due to its superior load capacity and durability, which are essential for supporting climbers safely. While it has higher costs and complexity, these drawbacks are offset by the benefits in performance and safety.
-
-\section{Integration of Subsystems}
-
-The selected concepts for each subsystem are designed to work cohesively within the overall system. The frame structure integrates the inclination adjustment system, braking system, and rotating surface. The frame must accommodate the dimensions specified (PR6 and PR7) and provide mounting points for the mechanical components.
-
-\subsection{Frame Structure}
-
-The frame is constructed using steel beams sized according to the chosen dimensions (approximately 1.6\,m width and 2.9\,m height). All shaft widths, upright beams, crossbeams, and other structural components are designed based on these dimensions. Finite Element Analysis (FEA) will be conducted to ensure structural integrity under the expected loads.
 
 \section{Conclusion}
 
@@ -459,4 +356,3 @@ Through a rigorous concept development and evaluation process, the preferred con
 These selections are justified based on their performance against the defined criteria, alignment with stakeholder and engineering requirements, and their ability to integrate effectively within the overall system design.
 
 Future work will focus on detailed design, including precise calculations, simulations, and integration of the control and safety systems.
-
